@@ -19,4 +19,5 @@ class Book(BaseModel):
     book_id: int  # primary
     subject: int  # foreign "subject_id"
     publisher: str | None = None
-    pages: list[Page.page_id]
+    # pages: list[Page.page_id]
+    pages: list[int]  # Page.page_id
