@@ -14,9 +14,13 @@ class Page(BaseModel):
     chapter: str
     publisher: str | None = None  # foreign "publisher"
 
+    class Config:
+        orm_mode = True
+
 
 class Book(BaseModel):
     book_id: int  # primary
     subject: int  # foreign "subject_id"
     publisher: str | None = None
-    pages: list[Page.page_id]
+    # pages: list[Page.page_id]
+    pages: list[Page.page_id]  # Page.page_id
