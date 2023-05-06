@@ -1,28 +1,28 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from database import Base
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from src.models.database import Base
 
 
 class Subject(Base):
     __tablename__ = "subjects"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    bookz = relationship("Book", back_populates="subject")
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(unique=True, index=True)
+    contents: Mapped[list["Book"]] = relationship()
 
 
 class Page(Base):
     __tablename__ = "pages"
-    id = Column(Integer, primary_key=True, index=True)
-    page_number = Column(Integer, primary_key=True, index=True)
-    book_id = Column(Integer, ForeignKey("Book.book_id"))
+    id = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
+    page_number = Column(Integer, unique=True, index=True)
     content = Column(String)
     chapter = Column(String)
-    book = relationship("Book", back_populates="pages")
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id"))
 
 
 class Book(Base):
     __tablename__ = "books"
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
+    subject = Column(Integer, ForeignKey("subjects.id"))
     title = Column(String, unique=True, index=True)
-    subject = Column(String)
-    pages = relationship("Page", back_populates="book")
+    publisher = Column(String, nullable=True)
+    pages: Mapped[list["Page"]] = relationship()

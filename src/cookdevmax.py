@@ -1,11 +1,23 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-import src.models.dataschema as models
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from src.models import dataschema, databasemodels
+from src.models.database import SessionLocal, engine
+
+databasemodels.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="src/web"))
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.on_event("startup")
@@ -32,36 +44,38 @@ async def return_all_subjects() -> list:
 
 
 @app.get("/books")
-async def get_all_books() -> list:
+async def get_all_books(db: Session = Depends(get_db)) -> list:
     """Returns a list containing all available books."""
-    ...
+    pass
 
 
 @app.post("/new/book", status_code=status.HTTP_201_CREATED)
-async def create_book(book: models.Book) -> None:
+async def create_book(book: dataschema.BookBase, db: Session = Depends(get_db)) -> None:
     """Creates a new book. Request body accepts the Book model as json and stores it sa a row in the database."""
-    ...
+    db_book = databasemodels.Book(subject=book.subject, title=book.title, publisher=book.publisher)
+    db.add(db_book)
+    db.commit()
 
 
 @app.post("/new/page", status_code=status.HTTP_201_CREATED)
-async def create_page(page: models.Page) -> None:
+async def create_page(page: dataschema.Page) -> None:
     """Creates a new page. Request body accepts the Page model as json and stores it sa a row in the database."""
     ...
 
 
 @app.post("/new/subject", status_code=status.HTTP_201_CREATED)
-async def create_subject(subject: models.Subject) -> None:
+async def create_subject(subject: dataschema.Subject) -> None:
     """This could probably just accept a name, and have the ID generated inside the DMBS..."""
     ...
 
 
 @app.put("/edit/{book_id}", status_code=status.HTTP_200_OK)
-async def edit_book(book: models.Book) -> None:
+async def edit_book(book: dataschema.Book) -> None:
     ...
 
 
 @app.put("/edit/{page_id}", status_code=status.HTTP_200_OK)
-async def edit_page(page: models.Page) -> None:
+async def edit_page(page: dataschema.Page) -> None:
     """Edits a page, accepting the Page model and updating the row. """
     # TODO: Decide if this should actually return the original page, for some kind of last minute undo/revert function
     ...
@@ -78,5 +92,3 @@ async def health_check() -> dict:
     # check latency to pages table
     # return json
     ...
-
-

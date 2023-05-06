@@ -1,26 +1,42 @@
 from pydantic import BaseModel
 
 
-class Subject(BaseModel):
-    subject_id: int  # primary
+class SubjectBase(BaseModel):
     subject_name: str  # unique
 
 
-class Page(BaseModel):
-    page_id: int  # unique
-    page_number: int  # used to solve the problem of page number != place in book
-    book_id: int  # foreign "item_id"
-    content: str  # don't know how to implement text
-    chapter: str
-    publisher: str | None = None  # foreign "publisher"
+class Subject(SubjectBase):
+    id: int  # primary
 
     class Config:
         orm_mode = True
 
 
-class Book(BaseModel):
-    book_id: int  # primary
+class PageBase(BaseModel):
+    page_number: int  # used to solve the problem of page number != place in book
+    content: str  # don't know how to implement text
+    chapter: str
+    book_id: int  # foreign "item_id"
+
+
+class Page(PageBase):
+    id: int  # Primary
+
+    class Config:
+        orm_mode = True
+
+
+class BookBase(BaseModel):
+    title: str  # unique
     subject: int  # foreign "subject_id"
     publisher: str | None = None
-    # pages: list[Page.page_id]
-    pages: list[Page.page_id]  # Page.page_id
+
+    class Config:
+        orm_mode = True
+
+
+class Book(BookBase):
+    id: int  # primary
+
+    class Config:
+        orm_mode = True
