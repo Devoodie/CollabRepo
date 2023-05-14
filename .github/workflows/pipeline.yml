@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                python - version: 3.11
+
+# This will install all of the Python dependencies required for the project.
+
+            - name: Install Dependencies
+              run: |
+                python -m pip install --upgrade pip 
+                pip install -r requirments.txt
+            - name: Run Tests
+              run: pytest 
+
+# Pytest is the command that executes the test folder and all the files in them. Needs modding most likely. 
+
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+             - name: Checkout repository
+               uses: actions/checkout@v2
+
+             - name: Build and push
+               id: docker_build
+               uses: docker/build-push-action@v2
+               with:
+                   context: .
+                   push: true
+                   tags: my-image-name:$(date +%s)
+# deliver:
+    # needs: build
+    # runs-on: ubuntu-latest
+
+# deploy:
+    # needs: deliver
+    # runs-on: ubuntu-latest 
+
