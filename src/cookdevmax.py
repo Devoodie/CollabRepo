@@ -46,7 +46,11 @@ async def return_all_subjects() -> list:
 @app.get("/books")
 async def get_all_books(db: Session = Depends(get_db)) -> list:
     """Returns a list containing all available books."""
-    pass
+    result = db.execute(select(databasemodels.Book))
+    booklist = []
+    for book in result:
+        booklist.append(book.id)
+    return booklist
 
 
 @app.post("/new/book", status_code=status.HTTP_201_CREATED)
@@ -55,8 +59,7 @@ async def create_book(book: dataschema.BookBase, db: Session = Depends(get_db)) 
     db_book = databasemodels.Book(subject=book.subject, title=book.title, publisher=book.publisher)
     db.add(db_book)
     db.commit()
-
-
+*
 @app.post("/new/page", status_code=status.HTTP_201_CREATED)
 async def create_page(page: dataschema.Page) -> None:
     """Creates a new page. Request body accepts the Page model as json and stores it sa a row in the database."""
@@ -79,7 +82,6 @@ async def edit_page(page: dataschema.Page) -> None:
     """Edits a page, accepting the Page model and updating the row. """
     # TODO: Decide if this should actually return the original page, for some kind of last minute undo/revert function
     ...
-
 # Save for when auth/auth is figured out
 # @app.delete("/{book_id}")
 # @app.delete("/{book_id}/{page_id}")
