@@ -59,7 +59,8 @@ async def create_book(book: dataschema.BookBase, db: Session = Depends(get_db)) 
     db_book = databasemodels.Book(subject=book.subject, title=book.title, publisher=book.publisher)
     db.add(db_book)
     db.commit()
-*
+
+
 @app.post("/new/page", status_code=status.HTTP_201_CREATED)
 async def create_page(page: dataschema.Page) -> None:
     """Creates a new page. Request body accepts the Page model as json and stores it sa a row in the database."""
