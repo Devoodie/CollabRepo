@@ -1,7 +1,6 @@
 from fastapi import FastAPI, status, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from src.models import dataschema, databasemodels
 from src.models.database import SessionLocal, engine
@@ -38,15 +37,23 @@ async def say_hello() -> str:
 
 
 @app.get("/subjects")
-async def return_all_subjects() -> list:
+async def return_all_subjects(db: Session = Depends(get_db)) -> list:
     """Returns a list containing all available subjects."""
-    ...
+    result = db.query(databasemodels.Subject)
+    booklist = []
+    for subject in result:
+        booklist.append(subject)
+    return booklist
 
 
 @app.get("/books")
 async def get_all_books(db: Session = Depends(get_db)) -> list:
     """Returns a list containing all available books."""
-    pass
+    result = db.query(databasemodels.Book)
+    booklist = []
+    for book in result:
+        booklist.append(book)
+    return booklist
 
 
 @app.post("/new/book", status_code=status.HTTP_201_CREATED)
@@ -58,15 +65,17 @@ async def create_book(book: dataschema.BookBase, db: Session = Depends(get_db)) 
 
 
 @app.post("/new/page", status_code=status.HTTP_201_CREATED)
-async def create_page(page: dataschema.Page) -> None:
+async def create_page(page: dataschema.PageBase, db: Session = Depends(get_db)) -> None:
     """Creates a new page. Request body accepts the Page model as json and stores it sa a row in the database."""
-    ...
+    db_page = databasemodels.Page(page_number=page.page_number, content=page.content, chapter=page.chapter, book_id=page.book_id)
+    db.add(db_page)
+    db.commit()
 
 
 @app.post("/new/subject", status_code=status.HTTP_201_CREATED)
 async def create_subject(subject: dataschema.Subject) -> None:
     """This could probably just accept a name, and have the ID generated inside the DMBS..."""
-    ...
+    ...  # I strongly believe this route should not exist and that we should have predetermined subjects -Dev
 
 
 @app.put("/edit/{book_id}", status_code=status.HTTP_200_OK)
@@ -79,7 +88,6 @@ async def edit_page(page: dataschema.Page) -> None:
     """Edits a page, accepting the Page model and updating the row. """
     # TODO: Decide if this should actually return the original page, for some kind of last minute undo/revert function
     ...
-
 # Save for when auth/auth is figured out
 # @app.delete("/{book_id}")
 # @app.delete("/{book_id}/{page_id}")
