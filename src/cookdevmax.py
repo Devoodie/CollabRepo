@@ -1,6 +1,7 @@
 from fastapi import FastAPI, status, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from src.models import dataschema, databasemodels
 from src.models.database import SessionLocal, engine
@@ -79,15 +80,24 @@ async def create_subject(subject: dataschema.Subject) -> None:
 
 
 @app.put("/edit/{book_id}", status_code=status.HTTP_200_OK)
-async def edit_book(book: dataschema.Book) -> None:
-    ...
+async def edit_book(book_id: int, book: dataschema.BookBase, db: Session = Depends(get_db)) -> None:
+    ogbook = select(databasemodels.Book).where(databasemodels.Book.id == book_id)
+    newbook = db.scalars(ogbook).one()
+    newbook.title = book.title
+    newbook.subject = book.subject
+    newbook.publisher = book.publisher
+    db.commit()
 
 
 @app.put("/edit/{page_id}", status_code=status.HTTP_200_OK)
-async def edit_page(page: dataschema.Page) -> None:
+async def edit_page(page_id: int, page: dataschema.PageBase, db: Session = Depends(get_db),) -> None:
     """Edits a page, accepting the Page model and updating the row. """
     # TODO: Decide if this should actually return the original page, for some kind of last minute undo/revert function
-    ...
+    ogpage = select(databasemodels.Page).where(databasemodels.Page.id == page_id)
+    newpage = db.scalars(ogpage).one()
+    newpage.content = page.content
+    newpage.chapter = page.chapter
+    db.commit()
 # Save for when auth/auth is figured out
 # @app.delete("/{book_id}")
 # @app.delete("/{book_id}/{page_id}")
