@@ -1,0 +1,39 @@
+.navbar {
+    list-style-type: none;
+}
+.navbar li{
+    display: inline;
+    padding-left: 150px;
+    padding-right: 150px;
+}
+.centered{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.centered section{
+    background: white;
+}
+.navbarbottom {
+    list-style-type: none;
+    margin-top: 25px;
+}
+.navbarbottom li{
+    display: inline;
+    padding-left: 75px;
+    padding-right: 75px;
+}
+.content{
+    margin-left: 350px;
+    margin-right: 350px;
+    font-size: 20px;
+}
+.divfixed{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
